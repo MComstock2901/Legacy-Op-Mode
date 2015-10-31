@@ -47,6 +47,7 @@ public class LegacyOpModeArmOnly extends OpMode {
     float armUpSpeed = 0.5f;
     float armDownSpeed = -0.1f;
     int armPosition = 0;
+    int armPosition2 = 0;
 
     DcMotorController.DeviceMode devMode;
     DcMotorController armController;
@@ -110,7 +111,7 @@ public class LegacyOpModeArmOnly extends OpMode {
             }else{
                 armPower = 0;
             }
-            telemetry.addData("motorPowerLoops = ", armPower);
+            telemetry.addData("Arm Power = ", armPower);
             motorArm.setPower(armPower);
         }
 
@@ -120,23 +121,18 @@ public class LegacyOpModeArmOnly extends OpMode {
         telemetry.addData("opLoops = ", numOpLoops);
 
         if (numOpLoops % 200 == 0){
-            armController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.READ_ONLY);
-            devMode = armController.getMotorControllerDeviceMode();
+                armController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.READ_ONLY);
+                //motorArm.setChannelMode(DcMotorController.);
+                devMode = armController.getMotorControllerDeviceMode();
 
-            // Update the reads after some loops, when the command has successfully propagated through.
-            armPosition = armController.getMotorCurrentPosition(1);
-            if (armPosition >= upperThresh)
-            {
-                upper = false;
-            }else{
-                upper = true;
+            while(!allowedToRead()) {
+                telemetry.addData("ERROR: ", "Not allowed to read!");
             }
-            if (armPosition <= lowerThresh)
-            {
-                lower = false;
-            }else{
-                lower = true;
-            }
+
+                // Update the reads after some loops, when the command has successfully propagated through.
+                armPosition = armController.getMotorCurrentPosition(1);
+                armPosition2 = motorArm.getCurrentPosition();
+
             // Only needed on Nxt devices, but not on USB devices
 
 
@@ -152,7 +148,8 @@ public class LegacyOpModeArmOnly extends OpMode {
 
         // Update the current devMode
         numOpLoops++;
-        telemetry.addData("Arm Motor", "Position:" + armPosition);
+        telemetry.addData("Arm Motor Position: ",  armPosition);
+        telemetry.addData("Arm Try 2: ", armPosition2);
         telemetry.addData("Mode:", armController.getMotorControllerDeviceMode().toString());
     }
 
