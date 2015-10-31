@@ -47,7 +47,6 @@ public class LegacyOpModeArmOnly extends OpMode {
     float armUpSpeed = 0.5f;
     float armDownSpeed = -0.1f;
     int armPosition = 0;
-    int armPosition2 = 0;
 
     DcMotorController.DeviceMode devMode;
     DcMotorController armController;
@@ -60,6 +59,7 @@ public class LegacyOpModeArmOnly extends OpMode {
     boolean lower;
 
     int numOpLoops = 1;
+    int lastReadLoop = 0;
 
     /*
      * Code to run when the op mode is first enabled goes here
@@ -92,9 +92,7 @@ public class LegacyOpModeArmOnly extends OpMode {
      */
     @Override
     public void loop() {
-        armController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.WRITE_ONLY);
         devMode = armController.getMotorControllerDeviceMode();
-
         // The op mode should only use "write" methods (setPower, setChannelMode, etc) while in
         // WRITE_ONLY mode or SWITCHING_TO_WRITE_MODE
         if (allowedToWrite()) {
@@ -113,44 +111,27 @@ public class LegacyOpModeArmOnly extends OpMode {
             }
             telemetry.addData("Arm Power = ", armPower);
             motorArm.setPower(armPower);
-        }
-
-        // To read any values from the NXT controllers, we need to switch into READ_ONLY mode.
-        // It takes time for the hardware to switch, so you can't switch modes within one loop of the
-        // op mode. Every 17th loop, this op mode switches to READ_ONLY mode, and gets the current power.
-        telemetry.addData("opLoops = ", numOpLoops);
-
-        if (numOpLoops % 200 == 0){
+            numOpLoops++;
+            if (numOpLoops % 200 == 0) {
                 armController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.READ_ONLY);
-                //motorArm.setChannelMode(DcMotorController.);
-                devMode = armController.getMotorControllerDeviceMode();
-
-            while(!allowedToRead()) {
-                telemetry.addData("ERROR: ", "Not allowed to read!");
             }
-
-                // Update the reads after some loops, when the command has successfully propagated through.
-                armPosition = armController.getMotorCurrentPosition(1);
-                armPosition2 = motorArm.getCurrentPosition();
-
-            // Only needed on Nxt devices, but not on USB devices
-
-
-            // Note: If you are using the NxtDcMotorController, you need to switch into "read" mode
-            // before doing a read, and into "write" mode before doing a write. This is because
-            // the NxtDcMotorController is on the I2C interface, and can only do one at a time. If you are
-            // using the USBDcMotorController, there is no need to switch, because USB can handle reads
-            // and writes without changing modes. The NxtDcMotorControllers start up in "write" mode.
-            // This method does nothing on USB devices, but is needed on Nxt devices.
+        } else if(allowedToRead()){
+            lastReadLoop = numOpLoops;
+            //armPosition = motorArm.getCurrentPosition();
+            armPosition = armController.getMotorCurrentPosition(2);
+            armController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.WRITE_ONLY);
+        } else {
 
         }
+
+        telemetry.addData("Mode: ", devMode);
+        telemetry.addData("opLoops = ", numOpLoops);
 
 
         // Update the current devMode
-        numOpLoops++;
+
+        telemetry.addData("last read = ", lastReadLoop);
         telemetry.addData("Arm Motor Position: ",  armPosition);
-        telemetry.addData("Arm Try 2: ", armPosition2);
-        telemetry.addData("Mode:", armController.getMotorControllerDeviceMode().toString());
     }
 
     // If the device is in either of these two modes, the op mode is allowed to write to the HW.

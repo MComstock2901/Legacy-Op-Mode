@@ -59,7 +59,7 @@ public class FtcOpModeRegister implements OpModeRegister {
 
     //manager.register("HelloWorld", HelloWorld.class);
     manager.register("LegacyOpMode", LegacyOpMode.class);
-    manager.register("LegacyOpModeTracking", LegacyOpModeArmOnly.class);
+    manager.register("LegacyOpModeArmOnly", LegacyOpModeArmOnly.class);
 
     //manager.register("K9TeleOp", K9TeleOp.class);
     //manager.register ("PushBotAuto", PushBotAuto.class);
