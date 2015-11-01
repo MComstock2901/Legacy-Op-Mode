@@ -47,6 +47,7 @@ public class LegacyOpModeArmOnly extends OpMode {
     float armUpSpeed = 0.5f;
     float armDownSpeed = -0.1f;
     int armPosition = 0;
+    double armPowerRead = 0;
 
     DcMotorController.DeviceMode devMode;
     DcMotorController armController;
@@ -84,6 +85,7 @@ public class LegacyOpModeArmOnly extends OpMode {
         // set the mode
         // Nxt devices start up in "write" mode by default, so no need to switch device modes here.
         motorArm.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+
     }
 
     /*
@@ -117,8 +119,9 @@ public class LegacyOpModeArmOnly extends OpMode {
             }
         } else if(allowedToRead()){
             lastReadLoop = numOpLoops;
-            //armPosition = motorArm.getCurrentPosition();
-            armPosition = armController.getMotorCurrentPosition(2);
+            armPosition = motorArm.getCurrentPosition();
+            //armPosition = armController.getMotorCurrentPosition(1);
+            armPowerRead = motorArm.getPower();
             armController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.WRITE_ONLY);
         } else {
 
@@ -132,6 +135,7 @@ public class LegacyOpModeArmOnly extends OpMode {
 
         telemetry.addData("last read = ", lastReadLoop);
         telemetry.addData("Arm Motor Position: ",  armPosition);
+        telemetry.addData("Arm Power:", armPowerRead);
     }
 
     // If the device is in either of these two modes, the op mode is allowed to write to the HW.
