@@ -45,9 +45,8 @@ import com.qualcomm.robotcore.util.Range;
 public class LegacyOpMode extends OpMode {
 
     float armUpSpeed = 0.5f;
-    float armDownSpeed = -0.1f;
+    float armDownSpeed = -0.f;
     float driveSpeed = 1.0f;
-    int  rightPos = 1;
     double armPower = 0;
     // position of the claw servo
     double handPosition;
@@ -69,10 +68,6 @@ public class LegacyOpMode extends OpMode {
     DcMotor motorRight;
     DcMotor motorLeft;
     DcMotor motorArm;
-    int upperThresh = 0;
-    int lowerThresh = 0;
-    boolean upper;
-    boolean lower;
     Servo hand;
     //Servo wrist;
 
@@ -112,6 +107,8 @@ public class LegacyOpMode extends OpMode {
         motorLeft.setChannelMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         motorRight.setChannelMode(DcMotorController.RunMode.RUN_WITHOUT_ENCODERS);
         motorArm.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        armController.setMotorChannelMode(1, DcMotorController.RunMode.RUN_USING_ENCODERS);
+        armController.setMotorChannelMode(2, DcMotorController.RunMode.RUN_USING_ENCODERS);
 
         wristPosition = 0.6;
         handPosition = 0.5;
@@ -180,19 +177,26 @@ public class LegacyOpMode extends OpMode {
 
             if (gamepad1.left_stick_x < 0) {
                 // negative value, stick is pulled to the left
-                right = right * (1 + gamepad1.left_stick_x);
+                if (right == 0){
+                    left = -1;
+                }else {
+                    right = right * (1 + gamepad1.left_stick_x);
+                }
                 //left *= -1;
             }
             if (gamepad1.left_stick_x > 0) {
-                // positive value, stick is pulled to the right
-                left = left * (1 - gamepad1.left_stick_x);
+                if (left == 0) {
+                    right = -1;
+                }else{
+                    // positive value, stick is pulled to the right
+                    left = left * (1 - gamepad1.left_stick_x);
+                }
                 //right *= -1;
             }
 
 
             //end race controls
 
-            float armPower;
  //           add  "&& upper" to the if statement to stop motor if it is above threshhold
             if (gamepad1.right_stick_y < 0){
                 armPower = armUpSpeed;
@@ -286,34 +290,16 @@ public class LegacyOpMode extends OpMode {
             }
         }
 
-        // To read any values from the NXT controllers, we need to switch into READ_ONLY mode.
         // It takes time for the hardware to switch, so you can't switch modes within one loop of the
         // op mode. Every 17th loop, this op mode switches to READ_ONLY mode, and gets the current power.
         telemetry.addData("opLoops = ", numOpLoops);
         telemetry.addData("motorPowerLoops = ", armPower);
-        telemetry.addData("arm motor", rightPos);
 
 
-        if (numOpLoops % 200 == 0){
+        if (numOpLoops % 200 == 0) {
             armController.setMotorControllerDeviceMode(DcMotorController.DeviceMode.READ_ONLY);
             devMode = armController.getMotorControllerDeviceMode();
-
-
-                // Update the reads after some loops, when the command has successfully propagated through.
-                rightPos = armController.getMotorCurrentPosition(1);
-                armPower = motorArm.getPower();
-            if ( rightPos >= upperThresh)
-            {
-                upper = false;
-            }else{
-                upper = true;
-            }
-            if ( rightPos <= lowerThresh)
-            {
-                lower = false;
-            }else{
-                lower = true;
-            }
+        }
             // Only needed on Nxt devices, but not on USB devices
 
 
@@ -324,10 +310,6 @@ public class LegacyOpMode extends OpMode {
             // using the USBDcMotorController, there is no need to switch, because USB can handle reads
             // and writes without changing modes. The NxtDcMotorControllers start up in "write" mode.
             // This method does nothing on USB devices, but is needed on Nxt devices.
-
-        }
-
-
 
 
         // Every 17 loops, switch to read mode so we can read data from the NXT device.

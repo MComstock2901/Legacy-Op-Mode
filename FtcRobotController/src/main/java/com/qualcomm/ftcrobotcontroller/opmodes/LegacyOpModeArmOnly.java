@@ -70,6 +70,9 @@ public class LegacyOpModeArmOnly extends OpMode {
     public void init() {
         motorArm = hardwareMap.dcMotor.get("motor_arm");
         armController = hardwareMap.dcMotorController.get("arm_controller");
+
+        //motorArm.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
+        motorArm.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
     }
 
     /*
@@ -79,11 +82,11 @@ public class LegacyOpModeArmOnly extends OpMode {
     @Override
     public void init_loop() {
 
-
         devMode = DcMotorController.DeviceMode.WRITE_ONLY;
 
         // set the mode
         // Nxt devices start up in "write" mode by default, so no need to switch device modes here.
+        //motorArm.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
         motorArm.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
 
     }
@@ -128,12 +131,12 @@ public class LegacyOpModeArmOnly extends OpMode {
         }
 
         telemetry.addData("Mode: ", devMode);
-        telemetry.addData("opLoops = ", numOpLoops);
+        telemetry.addData("opLoops: ", numOpLoops);
 
 
         // Update the current devMode
 
-        telemetry.addData("last read = ", lastReadLoop);
+        telemetry.addData("last read: ", lastReadLoop);
         telemetry.addData("Arm Motor Position: ",  armPosition);
         telemetry.addData("Arm Power:", armPowerRead);
     }
