@@ -2,6 +2,8 @@ package com.qualcomm.ftcrobotcontroller.helper;
 
 import android.content.Context;
 import android.content.res.Resources;
+
+import com.qualcomm.ftcrobotcontroller.R;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
@@ -24,6 +26,9 @@ import com.qualcomm.robotcore.hardware.Gamepad;
  * Note: for motors/servos, you could use the resourceID for that device (see devices.xml)
  */
 public abstract class Controls {
+    public static final int ID_MOTOR_LEFT_WHEEL = R.string.motor_wheel_left;
+    public static final int ID_MOTOR_RIGHT_WHEEL = R.string.motor_wheel_right;
+
     protected Context mContext;
     protected Gamepad mGamepad1;
     protected Gamepad mGamepad2;
@@ -56,7 +61,16 @@ public abstract class Controls {
      * @param defaultValue value to use if we could not find a controller defined value
      * @return resulting value
      */
-    public abstract float getValue(int id, float defaultValue);
+    public float getValue(int id, float defaultValue) {
+        switch(id) {
+            case(ID_MOTOR_LEFT_WHEEL):
+                return getLeftWheelValue();
+            case(ID_MOTOR_RIGHT_WHEEL):
+                return getRightWheelValue();
+            default:
+                return defaultValue;
+        }
+    }
 
     /**
      * Returns the controller value associated with the left wheel motor
